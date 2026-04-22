@@ -3,7 +3,7 @@
 
 ---
 
-## 📌 Tentang Project
+## 📌 Tentang
 
 **SPARK DTI** adalah sistem perencanaan akademik dan rute karir untuk Departemen Teknologi Informasi (DTI) di Institut Teknologi Sepuluh Nopember Surabaya. Sistem ini dirancang untuk membantu mahasiswa merencanakan jalur akademik dan karir mereka dengan lebih efektif dan terstruktur.
 
