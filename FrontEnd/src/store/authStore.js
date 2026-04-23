@@ -46,3 +46,22 @@ export const useUIStore = create((set) => ({
   openModal: (name) => set({ activeModal: name }),
   closeModal: () => set({ activeModal: null }),
 }))
+
+// Tambahkan ini di paling bawah file authStore.js
+export const useReminderStore = create(
+    persist(
+      (set) => ({
+        reminders: {},
+        toggleReminder: (id) =>
+          set((state) => ({
+            reminders: {
+              ...state.reminders,
+              [id]: !state.reminders[id],
+            },
+          })),
+      }),
+      {
+        name: 'spark-dti-reminders', // Agar lonceng yang kamu klik tetap tersimpan meski di-refresh
+      }
+    )
+  )
