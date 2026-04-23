@@ -1,5 +1,5 @@
-import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 export const useAuthStore = create(
   persist(
@@ -20,10 +20,10 @@ export const useAuthStore = create(
         }),
     }),
     {
-      name: 'spark-dti-auth',
-    }
-  )
-)
+      name: "spark-dti-auth",
+    },
+  ),
+);
 
 export const useUploadStore = create((set) => ({
   transcriptFile: null,
@@ -36,7 +36,7 @@ export const useUploadStore = create((set) => ({
 
   resetTranscript: () =>
     set({ transcriptFile: null, transcriptDocumentId: null }),
-}))
+}));
 
 export const useUIStore = create((set) => ({
   sidebarOpen: true,
@@ -45,23 +45,22 @@ export const useUIStore = create((set) => ({
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
   openModal: (name) => set({ activeModal: name }),
   closeModal: () => set({ activeModal: null }),
-}))
+}));
 
-// Tambahkan ini di paling bawah file authStore.js
 export const useReminderStore = create(
-    persist(
-      (set) => ({
-        reminders: {},
-        toggleReminder: (id) =>
-          set((state) => ({
-            reminders: {
-              ...state.reminders,
-              [id]: !state.reminders[id],
-            },
-          })),
-      }),
-      {
-        name: 'spark-dti-reminders', // Agar lonceng yang kamu klik tetap tersimpan meski di-refresh
-      }
-    )
-  )
+  persist(
+    (set) => ({
+      reminders: {},
+      toggleReminder: (id) =>
+        set((state) => ({
+          reminders: {
+            ...state.reminders,
+            [id]: !state.reminders[id],
+          },
+        })),
+    }),
+    {
+      name: "spark-dti-reminders",
+    },
+  ),
+);
