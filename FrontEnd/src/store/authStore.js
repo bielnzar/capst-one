@@ -1,30 +1,35 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+// 1. Store untuk Autentikasi (Penyebab utama error Token Malformed)
 export const useAuthStore = create(
   persist(
     (set) => ({
       isAuthenticated: false,
       user: null,
+      token: null, // Menyimpan token JWT untuk dikirim ke Backend
 
       login: (userData) =>
         set({
           isAuthenticated: true,
-          user: userData,
+          user: userData.user, // Menyimpan profil (nrp, nama, dll)[cite: 6]
+          token: userData.token, // Menyimpan string token murni[cite: 6]
         }),
 
       logout: () =>
         set({
           isAuthenticated: false,
           user: null,
+          token: null, // Reset token saat logout[cite: 6]
         }),
     }),
     {
-      name: "spark-dti-auth",
+      name: "spark-dti-auth", // Nama kunci di localStorage[cite: 6]
     },
   ),
 );
 
+// 2. Store untuk Proses Upload (Dibutuhkan oleh fitur Academic Mapper)
 export const useUploadStore = create((set) => ({
   transcriptFile: null,
   transcriptDocumentId: null,
@@ -38,6 +43,7 @@ export const useUploadStore = create((set) => ({
     set({ transcriptFile: null, transcriptDocumentId: null }),
 }));
 
+// 3. Store untuk UI (Dibutuhkan oleh MainLayout.jsx - Mencegah SyntaxError)[cite: 6]
 export const useUIStore = create((set) => ({
   sidebarOpen: true,
   activeModal: null,
@@ -47,6 +53,7 @@ export const useUIStore = create((set) => ({
   closeModal: () => set({ activeModal: null }),
 }));
 
+// 4. Store untuk Reminder/Notifikasi
 export const useReminderStore = create(
   persist(
     (set) => ({

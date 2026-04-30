@@ -1,72 +1,89 @@
+const axios = require("axios");
+const FormData = require("form-data");
 const fs = require("fs");
-const pdfjsLib = require("pdfjs-dist/legacy/build/pdf.js");
+const supabase = require("../config/supabase");
 
 exports.analyzeTranscript = async (req, res) => {
   const filePath = req.file ? req.file.path : null;
+  const userId = req.user.id;
 
   if (!filePath) {
-    return res.status(400).json({ message: "Tidak ada file yang diunggah" });
+    return res.status(400).json({ message: "File transkrip tidak ditemukan" });
   }
 
   try {
-    const extractText = async (path) => {
-      const data = new Uint8Array(fs.readFileSync(path));
-      const loadingTask = pdfjsLib.getDocument({
-        data,
-        disableFontFace: true,
-        verbosity: 0,
-      });
+    // 1. Ambil Identitas asli user dari Database (ITS Student Data)
+    const { data: profile, error: profileError } = await supabase
+      .from("student_profiles")
+      .select("full_name, nrp")
+      .eq("user_id", userId)
+      .single();
 
-      const pdf = await loadingTask.promise;
-      let fullText = "";
-
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const content = await page.getTextContent();
-        const strings = content.items.map((item) => item.str);
-        fullText += strings.join(" ") + " \n ";
-      }
-      return fullText;
-    };
-
-    const rawText = await extractText(filePath);
-    const courseRegex =
-      /([A-Z]{2}\d{6})\s+([\w\s&().,-]+?)\s+\d+\s+\d+\s+([A-E][+-]?)/g;
-
-    let matches;
-    const extractedCourses = [];
-
-    while ((matches = courseRegex.exec(rawText)) !== null) {
-      extractedCourses.push({
-        code: matches[1],
-        name: matches[2].trim().replace(/\n/g, ""),
-        grade: matches[3],
-      });
+    if (profileError || !profile) {
+      throw new Error("Profil mahasiswa tidak ditemukan di database.");
     }
 
+    // 2. Siapkan data untuk dikirim ke FastAPI AI Service
+    const form = new FormData();
+
+    /**
+     * PERBAIKAN KRUSIAL:
+     * Menambahkan opsi { filename, contentType } agar FastAPI tidak
+     * mendeteksi file sebagai 'application/octet-stream'.
+     */
+    form.append("file", fs.createReadStream(filePath), {
+      filename: req.file.originalname,
+      contentType: "application/pdf",
+    });
+
+    const aiResponse = await axios.post(
+      "http://127.0.0.1:8000/api/academic/upload-transcript",
+      form,
+      {
+        headers: {
+          ...form.getHeaders(), // Mengirim boundary multipart/form-data yang benar
+        },
+      },
+    );
+
+    /**
+     * 3. Ambil data dari FastAPI
+     * FastAPI membungkus respons utama di dalam properti 'data'
+     */
+    const aiResult = aiResponse.data.data;
+
+    // Ambil teks mentah hasil ekstraksi AI
+    const rawText = aiResult.raw_text || "";
+
+    // Ekstrak GPA (IPK) dari teks transkrip menggunakan Regex
+    const gpaMatch = rawText.match(
+      /(?:GPA|Indeks Prestasi|IPK)\s*:\s*(\d+\.\d+)/i,
+    );
+    const extractedGpa = gpaMatch ? parseFloat(gpaMatch[1]) : 0.0;
+
+    /**
+     * 4. Kirim respons final ke Frontend Spark DTI
+     * Menggabungkan data identitas (DB) dan data akademik (AI)
+     */
     return res.json({
-      message: "Parsing Berhasil",
-      studentName: "Fikri Aulia As Sa'adi",
-      nrp: "5027231026",
-      gpa: 3.71,
-      coursesCount: extractedCourses.length,
-      extractedData: extractedCourses,
-      skillData: [
-        { subject: "Web Dev", score: 85, fullMark: 100 },
-        { subject: "Database", score: 90, fullMark: 100 },
-        { subject: "Cloud", score: 70, fullMark: 100 },
-        { subject: "AI/ML", score: 40, fullMark: 100 },
-        { subject: "Security", score: 30, fullMark: 100 },
-        { subject: "Networking", score: 65, fullMark: 100 },
-      ],
-      careerMatches: [
-        { role: "Backend Engineer", match: 95, color: "#16a34a" },
-        { role: "Data Scientist", match: 45, color: "#9333ea" },
-      ],
+      message: "Analisis Berhasil",
+      studentName: profile.full_name,
+      nrp: profile.nrp,
+      gpa: extractedGpa,
+      extractedData: aiResult.courses || [],
+      skillData: aiResult.skill_data || [],
+      careerMatches: aiResult.career_matches || [],
     });
   } catch (err) {
-    return res.status(500).json({ message: "Gagal memproses transkrip" });
+    // Logging detail error untuk mempermudah debugging di terminal
+    console.error("🔥 Error Detail:", err.response?.data || err.message);
+
+    return res.status(500).json({
+      message: "Gagal memproses data transkrip",
+      detail: err.response?.data?.detail || err.message,
+    });
   } finally {
+    // Selalu hapus file sementara di folder /uploads setelah proses selesai
     if (filePath && fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
