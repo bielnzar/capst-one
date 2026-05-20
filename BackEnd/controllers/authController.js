@@ -84,8 +84,8 @@ exports.login = async (req, res) => {
       token,
       user: {
         nrp: user.nrp,
-        nama: user.student_profiles[0]?.full_name || "Mahasiswa",
-        semester: user.student_profiles[0]?.current_semester || 6,
+        full_name: user.student_profiles[0]?.full_name || "Mahasiswa",
+        current_semester: user.student_profiles[0]?.current_semester || 6,
       },
     });
   } catch (err) {
