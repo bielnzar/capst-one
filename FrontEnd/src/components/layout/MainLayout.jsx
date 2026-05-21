@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { path: '/opportunity-board', key: 'opportunity-board', icon: BoardIcon, label: 'Opportunity Board' },
   { path: '/cv-reviewer', key: 'cv-reviewer', icon: FileIcon, label: 'CV Reviewer' },
   { path: '/sks-chatbot', key: 'sks-chatbot', icon: ChatIcon, label: 'Konversi SKS' },
+  { path: '/mbkm-chatbot', key: 'mbkm-chatbot', icon: ChatIcon, label: 'MBKM Chatbot' },
 ]
 
 export default function MainLayout() {

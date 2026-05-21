@@ -4,6 +4,7 @@ export const FEATURE_COLORS = {
   'opportunity-board': { bg: '#fdf2f8', border: '#fbcfe8', accent: '#ec4899', text: '#9d174d' },
   'cv-reviewer': { bg: '#eff6ff', border: '#bfdbfe', accent: '#3b82f6', text: '#1d4ed8' },
   'sks-chatbot': { bg: '#fef2f2', border: '#fecaca', accent: '#ef4444', text: '#991b1b' },
+  'mbkm-chatbot': { bg: '#f0f9ff', border: '#bae6fd', accent: '#0ea5e9', text: '#0c4a6e' },
   }
   
   export const CAREER_ROLES = [

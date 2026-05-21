@@ -10,6 +10,7 @@ import SemesterPlannerPage from './pages/SemesterPlannerPage'
 import OpportunityBoardPage from './pages/OpportunityBoardPage'
 import CvReviewerPage from './pages/CvReviewerPage'
 import SksChatbotPage from './pages/SksChatbotPage'
+import MBKMChatbotPage from './pages/MBKMChatbotPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 import { useAuthStore } from './store/authStore'
@@ -49,6 +50,7 @@ export default function App() {
             <Route path="opportunity-board" element={<OpportunityBoardPage />} />
             <Route path="cv-reviewer" element={<CvReviewerPage />} />
             <Route path="sks-chatbot" element={<SksChatbotPage />} />
+            <Route path="mbkm-chatbot" element={<MBKMChatbotPage />} />
           </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

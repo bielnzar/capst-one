@@ -28,10 +28,19 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
+        // Console log untuk debugging
+        console.log("Login successful, user data:", data);
+        
+        // Save token ke localStorage untuk axios interceptor
+        localStorage.setItem("token", data.token);
+        
+        // Call authStore login dengan format yang benar
         login({
-          nrp: data.user.nrp,
-          nama: data.user.nama,
-          semester: data.user.semester,
+          user: {
+            nrp: data.user.nrp,
+            full_name: data.user.full_name,
+            current_semester: data.user.current_semester,
+          },
           token: data.token,
         });
         navigate("/academic-mapper");
@@ -39,6 +48,7 @@ export default function LoginPage() {
         setErrorMsg(data.message || "Login Gagal.");
       }
     } catch (error) {
+      console.error("Login error:", error);
       setErrorMsg("Gagal terhubung ke server.");
     } finally {
       setLoading(false);
